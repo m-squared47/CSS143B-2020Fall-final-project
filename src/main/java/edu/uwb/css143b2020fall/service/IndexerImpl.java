@@ -44,6 +44,7 @@ public class IndexerImpl implements Indexer {
             docPositions.clear();
         }
 
+        System.out.println(indexes.toString());
         return indexes;
     }
 

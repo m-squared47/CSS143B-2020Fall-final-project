@@ -26,7 +26,7 @@ public class IndexerTest {
         for (TestCase testCase : cases) {
             Map<String, List<List<Integer>>> actual = indexer.index(testCase.input);
             // uncomment this to see the index
-            System.out.println(actual);
+            //System.out.println(actual);
             assertEquals(testCase.expect, actual);
         }
     }

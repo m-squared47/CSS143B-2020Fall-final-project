@@ -20,9 +20,6 @@ public class SearcherImpl implements Searcher {
         //split keyphrase by spaces
         String[] keyWords = keyPhrase.split("\\s+");
 
-        //documents where there is no match
-        List<Integer> notCommon = new ArrayList<>();
-
         if(keyWords.length == 0){           //no input
             return result;
         }
@@ -56,7 +53,7 @@ public class SearcherImpl implements Searcher {
             //both word_1 and word_2 have elements
             //initialize list of documents for both words
             //      word_1 initialized on first iteration and after each iteration
-            indexWord_2 = index.get(word_2);
+            indexWord_2 = index.get(word);
 
             //~~~~~traverse indexes in each document
             //find common docs using first 2 words
@@ -64,11 +61,11 @@ public class SearcherImpl implements Searcher {
             if(indexWord_1 != null && indexWord_2 != null) {
                 //special case - word_1 and word_2 are the same words
                 if(word_1.equals(word_2)){
-                    findCommonDocsRepeat(indexWord_1, indexWord_2, result, notCommon);
+                    findCommonDocsRepeat(indexWord_1, indexWord_2, result);
                 }
                 //normal case - word_1 and word_2 are different
                 else if(indexWord_1.size() > 0 && indexWord_2.size() > 0){
-                    findCommonDocs(indexWord_1, indexWord_2, result, notCommon);
+                    findCommonDocs(indexWord_1, indexWord_2, result);
                 }
                 //fault is found, return clear result
                 else{
@@ -88,7 +85,7 @@ public class SearcherImpl implements Searcher {
         }
 
         /*
-            Tasks                       Status (+ complete, - incomplete, ~ in progress)
+            Tasks                       Status (+ complete, ~ incomplete, - in progress)
             ----------------------------------
         Split keyPhrase                 +
         Solve for empty string          +
@@ -97,8 +94,10 @@ public class SearcherImpl implements Searcher {
         -Solve for 2+ word input        +
         -Solve for repeated words       +
         -Solve for white spaces         +
+        Solve for if shows more than 2  -
          */
 
+        System.out.println(result.toString() + " for target: " + keyPhrase);
         return result;
     }
 
@@ -126,26 +125,33 @@ public class SearcherImpl implements Searcher {
      * @param common
      */
     private void findCommonDocs
-    (List<List<Integer>> indexWord_1, List<List<Integer>> indexWord_2, List<Integer> common, List<Integer> notCommon){
+    (List<List<Integer>> indexWord_1, List<List<Integer>> indexWord_2, List<Integer> common){
         //for every document
         for(int i = 0; i < indexWord_2.size(); i++){
+
             //if word 1 or word 2 do not exist in any documents, leave
             if(indexWord_1 == null || indexWord_2 == null)
                 break;
 
-            //if first word does not exist in the doc name, continue
-            if(indexWord_1.get(i).isEmpty())
+            //if first word does not exist in the doc name
+            //remove common doc if in the common list, continue
+            if(indexWord_1.get(i).isEmpty()){
+                if(common.contains(i)){
+                    common.remove(Integer.valueOf(i));
+                }
                 continue;
+            }
             List<Integer> indexes_1 = indexWord_1.get(i);
 
             //if second word does not exist in doc name, continue
-            if(indexWord_2.get(i).isEmpty())
+            //remove common doc if in the common list, continue
+            if(indexWord_2.get(i).isEmpty()){
+                if(common.contains(i)){
+                    common.remove(Integer.valueOf(i));
+                }
                 continue;
+            }
             List<Integer> indexes_2 = indexWord_2.get(i);
-
-            //if the document is already found as not common, skip
-            if(notCommon.contains(i))
-                continue;
 
             //for every element in indexes of word 1
             for(int f = 0; f < indexes_1.size(); f++){
@@ -153,10 +159,12 @@ public class SearcherImpl implements Searcher {
                 for(int j = 0; j < indexes_2.size(); j++){
                     //if the words are in order, add document id to the common list
                     if(indexes_1.get(f) == indexes_2.get(j) - 1){
-                        //if not already in the list
+                        //if not already in the list, add and break
                         if(!common.contains(i)) {
                             common.add(i);
                         }
+
+                        break;
                     }
                     //if in common and found as a non-match, remove from common
                     else if(!common.isEmpty()){
@@ -174,10 +182,9 @@ public class SearcherImpl implements Searcher {
      * @param indexWord_1
      * @param indexWord_2
      * @param common
-     * @param notCommon
      */
     private void findCommonDocsRepeat
-            (List<List<Integer>> indexWord_1, List<List<Integer>> indexWord_2, List<Integer> common, List<Integer> notCommon) {
+            (List<List<Integer>> indexWord_1, List<List<Integer>> indexWord_2, List<Integer> common) {
         //for every document
         for(int i = 0; i < indexWord_2.size(); i++){
             //words are the same, only nee to compare one list
@@ -190,10 +197,6 @@ public class SearcherImpl implements Searcher {
                 continue;
             List<Integer> indexes_1 = indexWord_1.get(i);
             List<Integer> indexes_2 = indexWord_2.get(i);
-
-            //if the document is already found as not common, skip
-            if(notCommon.contains(i))
-                continue;
 
             //for every element in indexes_1 and indexes_2
             //indexes_2 is read 1 step ahead
