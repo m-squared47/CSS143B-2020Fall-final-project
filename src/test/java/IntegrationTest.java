@@ -34,6 +34,18 @@ public class IntegrationTest {
         }
     }
 
+    @Test
+    public void anotherTestIntegration(){
+        List<TestCase> cases = getNewTestCase();
+        for(TestCase case_ : cases){
+            List<Integer> actual = searcher.search(
+                    case_.target,
+                    indexer.index(case_.documents)
+            );
+            assertEquals(case_.expect, actual);
+        }
+    }
+
     private List<TestCase> getTestCase() {
         List<String> documents = Util.getDocumentsForIntTest();
 
@@ -106,6 +118,56 @@ public class IntegrationTest {
         ));
 
         return testCases;
+    }
+
+    private List<TestCase> getNewTestCase(){
+        List<String> documentNames = new ArrayList<>(
+                Arrays.asList(
+                "this is a document",           //0 regular name
+                "this is a test",               //1 matching some words from the last name
+                "this this this is a repeat",   //2 single repeating word
+                "test a document",              //3 regular name
+                "document",                     //4 single word
+                "this is   this",               //5 white space and repeating word
+                "this a this a test document"   //6 repeating phrase
+            )
+        );
+
+        List<TestCase> cases = new ArrayList<>(Arrays.asList(
+                new TestCase(
+                        documentNames,
+                        "this",
+                        new ArrayList<>(Arrays.asList(0, 1, 2, 5, 6))
+                ),
+                new TestCase(
+                        documentNames,
+                        "document",
+                        new ArrayList<>(Arrays.asList(0, 3, 4, 6))
+                ),
+                new TestCase(
+                        documentNames,
+                        "this this",
+                        new ArrayList<>(Arrays.asList(2))
+                ),
+                new TestCase(
+                        documentNames,
+                        "is this",
+                        new ArrayList<>(Arrays.asList(5))
+                ),
+                new TestCase(
+                        documentNames,
+                        "this is a document",
+                        new ArrayList<>(Arrays.asList(0))
+                ),
+                new TestCase(
+                        documentNames,
+                        "this does not exist",
+                        new ArrayList<>()
+                )
+            )
+        );
+
+        return cases;
     }
 
     private class TestCase {
