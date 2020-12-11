@@ -26,8 +26,6 @@ public class IndexerImpl implements Indexer {
             }
         }
 
-        System.out.println(uniqueWords.toString());
-
         //find the position of each word in each document name
         List<List<Integer>> docPositions = new ArrayList<>();
 
@@ -44,7 +42,6 @@ public class IndexerImpl implements Indexer {
             docPositions.clear();
         }
 
-        System.out.println(indexes.toString());
         return indexes;
     }
 
@@ -72,6 +69,7 @@ public class IndexerImpl implements Indexer {
     private List<Integer> findPositions(String wordToFind, String docName){
         List<Integer> result = new ArrayList<>();
         String[] split = docName.split("\\s+");
+
         //strings with length of 0 are showing up so this will allow the index to be decremented by how many
         //are found
         int isNot = 0;

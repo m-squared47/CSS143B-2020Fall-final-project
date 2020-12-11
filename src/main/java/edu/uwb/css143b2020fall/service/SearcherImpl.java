@@ -20,11 +20,13 @@ public class SearcherImpl implements Searcher {
         //split keyphrase by spaces
         String[] keyWords = keyPhrase.split("\\s+");
 
-        if(keyWords.length == 0){           //no input
+        //no input
+        if(keyWords.length == 0){
             return result;
         }
 
-        else if(keyWords.length == 1){      //single word input
+        //single word input
+        else if(keyWords.length == 1){
             if(index.get(keyWords[0]) == null)
                 return result;
 
@@ -32,17 +34,16 @@ public class SearcherImpl implements Searcher {
             return result;
         }
 
-        String word_1 = null;               //multi word input
+        //multi word input
+        String word_1 = null;
         String word_2;
         List<List<Integer>> indexWord_1 = new ArrayList<>();
         List<List<Integer>> indexWord_2;
 
         for(String word : keyWords){
             //~~~~~traverse the keyphrase
-            //next word into word 2
             word_2 = word;
 
-            //if this is the first iteration (word 1 is null), put current word into word 1 and reiterate
             if(word_1 == null){
                 word_1 = word;
                 indexWord_1 = index.get(word);
@@ -50,29 +51,24 @@ public class SearcherImpl implements Searcher {
             }
 
             //~~~~~traverse documents
-            //both word_1 and word_2 have elements
-            //initialize list of documents for both words
-            //      word_1 initialized on first iteration and after each iteration
             indexWord_2 = index.get(word);
 
             //~~~~~traverse indexes in each document
-            //find common docs using first 2 words
-            //if not null and if word exists
             if(indexWord_1 != null && indexWord_2 != null) {
-                //special case - word_1 and word_2 are the same words
+                //case 1 - word_1 and word_2 are the same words
                 if(word_1.equals(word_2)){
                     findCommonDocsRepeat(indexWord_1, indexWord_2, result);
                 }
-                //normal case - word_1 and word_2 are different
+                //case 2 - word_1 and word_2 are different
                 else if(indexWord_1.size() > 0 && indexWord_2.size() > 0){
                     findCommonDocs(indexWord_1, indexWord_2, result);
                 }
-                //fault is found, return clear result
+                //case 3 - fault is found, return clear result
                 else{
                     return new ArrayList<>();
                 }
             }
-            //if one or both words do not exist, return empty result
+            //if one or both words do not exist
             else{
                 return new ArrayList<>();
             }
@@ -94,10 +90,9 @@ public class SearcherImpl implements Searcher {
         -Solve for 2+ word input        +
         -Solve for repeated words       +
         -Solve for white spaces         +
-        Solve for if shows more than 2  -
+        Solve - if shows twice or more  +
          */
 
-        System.out.println(result.toString() + " for target: " + keyPhrase);
         return result;
     }
 
@@ -129,12 +124,11 @@ public class SearcherImpl implements Searcher {
         //for every document
         for(int i = 0; i < indexWord_2.size(); i++){
 
-            //if word 1 or word 2 do not exist in any documents, leave
+            //if word 1 or word 2 do not exist in any documents
             if(indexWord_1 == null || indexWord_2 == null)
                 break;
 
             //if first word does not exist in the doc name
-            //remove common doc if in the common list, continue
             if(indexWord_1.get(i).isEmpty()){
                 if(common.contains(i)){
                     common.remove(Integer.valueOf(i));
@@ -143,8 +137,7 @@ public class SearcherImpl implements Searcher {
             }
             List<Integer> indexes_1 = indexWord_1.get(i);
 
-            //if second word does not exist in doc name, continue
-            //remove common doc if in the common list, continue
+            //if second word does not exist in doc name
             if(indexWord_2.get(i).isEmpty()){
                 if(common.contains(i)){
                     common.remove(Integer.valueOf(i));
@@ -153,20 +146,19 @@ public class SearcherImpl implements Searcher {
             }
             List<Integer> indexes_2 = indexWord_2.get(i);
 
-            //for every element in indexes of word 1
+            //for every appearance in doc[i] (word_1)
             for(int f = 0; f < indexes_1.size(); f++){
-                //for every element in indexes of word 2
+                //for every appearance in doc[i] (word 2)
                 for(int j = 0; j < indexes_2.size(); j++){
-                    //if the words are in order, add document id to the common list
+                    //if the words are in order
                     if(indexes_1.get(f) == indexes_2.get(j) - 1){
-                        //if not already in the list, add and break
+                        //if not already in the list
                         if(!common.contains(i)) {
                             common.add(i);
                         }
-
                         break;
                     }
-                    //if in common and found as a non-match, remove from common
+                    //if in common and found as a non-match
                     else if(!common.isEmpty()){
                         if(common.contains(i)){
                             common.remove(Integer.valueOf(i));
@@ -187,8 +179,8 @@ public class SearcherImpl implements Searcher {
             (List<List<Integer>> indexWord_1, List<List<Integer>> indexWord_2, List<Integer> common) {
         //for every document
         for(int i = 0; i < indexWord_2.size(); i++){
-            //words are the same, only nee to compare one list
-            //if word 1 or word 2 do not exist in any documents, leave
+            //words are the same, only need to compare one list
+            //if word 1 or word 2 do not exist in any documents
             if(indexWord_1 == null)
                 break;
 
@@ -208,7 +200,7 @@ public class SearcherImpl implements Searcher {
                             common.add(i);
                         }
                     }
-                    //if in common and found as a non-match, remove from common
+                    //if in common and found as a non-match
                     else if(!common.isEmpty()){
                         if(common.contains(i)){
                             common.remove(Integer.valueOf(i));
